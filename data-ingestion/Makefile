@@ -1,4 +1,4 @@
-.PHONY: help setup install clean migrate upgrade downgrade revision current history test lint format
+.PHONY: help setup install clean migrate upgrade downgrade revision current history test lint format ingest
 
 # Default target
 help:
@@ -15,6 +15,7 @@ help:
 	@echo "  test       - Run tests (if any)"
 	@echo "  lint       - Run code linting"
 	@echo "  format     - Format code"
+	@echo "  ingest     - Run quotes ingestor (use FILE=path/to/quotes.json)"
 
 # Virtual environment setup
 .venv/pyvenv.cfg:
@@ -23,36 +24,32 @@ help:
 
 setup: .venv/pyvenv.cfg
 
-# Install dependencies (updates when requirements.txt changes)
-.venv/lib/python*/site-packages/alembic: .venv/pyvenv.cfg requirements.txt
-	.venv/bin/pip install --upgrade pip
-	.venv/bin/pip install -r requirements.txt
-	@touch .venv/lib/python*/site-packages/alembic
-
-install: .venv/lib/python*/site-packages/alembic
+# Install dependencies using system pip3 with --break-system-packages
+install:
+	pip3 install -r requirements.txt --break-system-packages
 
 # Migration commands
-migrate: .venv/lib/python*/site-packages/alembic
-	.venv/bin/alembic upgrade head
+migrate:
+	alembic upgrade head
 
 upgrade: migrate
 
-downgrade: .venv/lib/python*/site-packages/alembic
-	.venv/bin/alembic downgrade -1
+downgrade:
+	alembic downgrade -1
 
-revision: .venv/lib/python*/site-packages/alembic
+revision:
 	@if [ -z "$(MSG)" ]; then \
 		echo "Error: Please provide a message with MSG='description'"; \
 		echo "Example: make revision MSG='add user table'"; \
 		exit 1; \
 	fi
-	.venv/bin/alembic revision --autogenerate -m "$(MSG)"
+	alembic revision -m "$(MSG)"
 
-current: .venv/lib/python*/site-packages/alembic
-	.venv/bin/alembic current
+current:
+	alembic current
 
-history: .venv/lib/python*/site-packages/alembic
-	.venv/bin/alembic history
+history:
+	alembic history
 
 # Development commands
 test: .venv/lib/python*/site-packages/alembic
@@ -63,6 +60,15 @@ lint: .venv/lib/python*/site-packages/alembic
 
 format: .venv/lib/python*/site-packages/alembic
 	@echo "No formatting configured yet"
+
+# Data ingestion
+ingest:
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: Please provide a JSON file with FILE='path/to/quotes.json'"; \
+		echo "Example: make ingest FILE='../quotes.json'"; \
+		exit 1; \
+	fi
+	python3 -m src.data_ingestion.ingestor $(FILE)
 
 # Cleanup
 clean:
