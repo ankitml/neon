@@ -6,3 +6,15 @@ __pycache__
 backend/golang/tmp/
 backend/golang/server.log
 backend/golang/build-errors.log
+
+# Frontend development files
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
