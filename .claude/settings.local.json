@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(alembic init:*)",
+      "Bash(pip install:*)",
+      "Bash(make:*)",
+      "Bash(pip3 install:*)",
+      "Bash(alembic revision:*)",
+      "Bash(psql:*)"
+    ],
+    "deny": []
+  }
+}
