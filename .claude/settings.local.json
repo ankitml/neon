@@ -19,7 +19,10 @@
       "Bash(cat:*)",
       "Bash(python3:*)",
       "Bash(timeout 5m make ingest FILE='./quotes.json')",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(source .env)",
+      "WebFetch(domain:docs.paradedb.com)"
     ],
     "deny": []
   }

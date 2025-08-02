@@ -1,4 +1,4 @@
-.PHONY: help setup install clean migrate upgrade downgrade revision current history test lint format ingest
+.PHONY: help setup install clean migrate upgrade downgrade revision current history test lint format ingest validate-bm25
 
 # Default target
 help:
@@ -16,6 +16,7 @@ help:
 	@echo "  lint       - Run code linting"
 	@echo "  format     - Format code"
 	@echo "  ingest     - Run quotes ingestor (use FILE=path/to/quotes.json)"
+	@echo "  validate-bm25 - Run BM25 search validation tests"
 
 # Virtual environment setup
 .venv/pyvenv.cfg:
@@ -69,6 +70,10 @@ ingest:
 		exit 1; \
 	fi
 	python3 -m src.data_ingestion.ingestor $(FILE)
+
+# BM25 validation
+validate-bm25:
+	python3 bm25-validator.py
 
 # Cleanup
 clean:
