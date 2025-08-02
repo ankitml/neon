@@ -37,59 +37,98 @@ UI Library: Skeleton UI (with Tailwind CSS)
 Database: Neon (Serverless PostgreSQL with pg_search)
 
 4. Implementation Plan
-Phase 1: Backend Foundation & Database Setup (2-3 hours)
-Goal: Create a Go server that can connect to the database and serve a basic health check endpoint.
 
-Steps:
+Phase 1: Backend Foundation & Database Setup ✅
+**Status: COMPLETED**
+- ✅ Neon PostgreSQL database setup with quotes table
+- ✅ Go HTTP server with pgx driver and environment configuration
+- ✅ Health check endpoint and database connection validation
 
-Setup Neon Database: Create a project, get the connection string, and create the quotes table. Import a dataset.
+Phase 2: Search Logic Implementation ✅  
+**Status: COMPLETED**
+- ✅ ParadeDB BM25 full-text search indexes created
+- ✅ Search API endpoint with relevance scoring and text highlighting
+- ✅ CORS middleware for frontend integration
+- ✅ PostgreSQL array handling and nullable field support
 
-Initialize Go Project: Set up a backend folder and initialize a Go module.
+Phase 3: Frontend Application ✅
+**Status: COMPLETED** 
+- ✅ SvelteKit project with TypeScript and Tailwind CSS
+- ✅ Responsive search interface with modern design
+- ✅ Real-time API integration with loading states and error handling
+- ✅ Quote cards with copy-to-clipboard and toast notifications
 
-Create Basic HTTP Server: Use net/http and the chi router to create a /health endpoint.
+Phase 4: Frontend-Backend Integration ✅
+**Status: COMPLETED**
+- ✅ Fetch API integration with Go backend
+- ✅ State management for search results, loading, and errors  
+- ✅ Dynamic result rendering with tags, categories, and relevance scores
 
-Establish Database Connection: Use the pgx driver to connect to Neon, pulling credentials from environment variables.
+Phase 5: Kubernetes Deployment (2-3 hours)
+**Goal: Deploy the full-stack application to Civo Kubernetes cluster with public IP access**
 
-Phase 2: Implementing Search Logic (Go) (3-4 hours)
-Goal: Create a search API endpoint that uses pg_search to find quotes.
+## Chosen Architecture: Simplified Single-Pod Deployment
 
-Steps:
+**Best Practices for Single-Pod Architecture:**
+- **Nginx Reverse Proxy**: Frontend served as static files, API requests proxied to Go backend
+- **Resource Efficiency**: Lower memory/CPU footprint, cost-effective for small-medium traffic
+- **Simplified Networking**: Single service endpoint, easier debugging and monitoring
+- **Container Optimization**: Multi-stage builds to minimize image size
+- **Health Checks**: Proper liveness/readiness probes for both frontend and backend
+- **Graceful Shutdown**: Proper signal handling for zero-downtime deployments
 
-Prepare Database for Full-Text Search: Add a tsvector column (tsv), create an update trigger, and build a GIN index on the tsv column for performance.
+## Implementation Steps:
 
-Build the Search Endpoint: Create a GET /api/search route that accepts a q parameter and executes a to_tsquery SQL command.
+**Container Registry Setup (15 minutes)**:
+- **Free Private Options**: GitHub Container Registry (ghcr.io) - 500MB free private storage
+- **Fallback**: Docker Hub public repository if private storage exceeded
+- Configure registry authentication for Kubernetes
 
-Enable CORS: Add a CORS middleware to the chi router to allow requests from the SvelteKit frontend.
+**Containerization (45 minutes)**:
+- Multi-stage Dockerfile combining SvelteKit build + Go backend + Nginx
+- Nginx configuration for static file serving and API proxying
+- Docker Compose for local full-stack testing
+- Image optimization and security scanning
 
-Phase 3: Frontend Scaffolding (SvelteKit & Skeleton UI) (2-3 hours)
-Goal: Set up a new SvelteKit project with Skeleton UI and create the main page layout.
+**Kubernetes Manifests (1 hour)**:
+- Deployment with single pod containing frontend+backend
+- LoadBalancer Service for public IP exposure
+- ConfigMap for Nginx configuration and environment variables
+- Secret for Neon database credentials
+- Health check endpoints and probes
 
-Steps:
+**Manual Deployment (30 minutes)**:
+- kubectl apply commands and verification
+- Service IP and port testing
+- Log monitoring and troubleshooting
+- Basic smoke testing of search functionality
 
-Initialize SvelteKit Project: Run npm create svelte@latest frontend and choose the "Skeleton project" template.
+## Container Registry Recommendation:
+**GitHub Container Registry (ghcr.io)** - Free 500MB private storage, integrates with your existing GitHub repo
 
-Integrate Skeleton UI: Follow the official guide to install dependencies, set up Tailwind, and choose a theme.
+---
 
-Create Layout & Main Page: Build the main app shell in +layout.svelte and use Skeleton components in +page.svelte to create the search bar and results area.
+Phase 6: Production Enhancements (3-4 hours)
+**Goal: Add production-ready features for reliability and automation**
 
-Phase 4: Connecting Frontend to Backend (3-4 hours)
-Goal: Make the SvelteKit app fetch and display search results from the Go API.
+**Domain & SSL (1 hour)**:
+- Custom domain configuration with DNS
+- cert-manager for automated SSL certificate management
+- HTTPS redirect and security headers
 
-Steps:
+**Auto-scaling & Performance (1 hour)**:
+- Horizontal Pod Autoscaler (HPA) based on CPU/memory metrics
+- Resource requests and limits optimization
+- Ingress controller with load balancing
 
-Fetch Data: Write a function in +page.svelte that uses the fetch API to call the Go backend's /api/search endpoint.
+**CI/CD Automation (1.5 hours)**:
+- GitHub Actions workflow for automated deployment
+- Build, test, and deploy pipeline
+- Rolling updates and rollback strategies
+- Environment-specific deployments (staging/production)
 
-Manage State: Use Svelte writable stores for searchResults, isLoading, and error.
-
-Display Results: Use Svelte's {#each} and {#if} blocks to render the results using Skeleton's <Card> and <ProgressBar> components.
-
-Phase 5: Polish & Refine (2+ hours)
-Goal: Improve the user experience and add finishing touches.
-
-Steps:
-
-Refine UI: Add a header/footer, implement helpful user messages ("no results found"), and fine-tune typography.
-
-Add "Copy to Clipboard" Feature: Add a copy button to each card and use a Skeleton <Toast> for user feedback.
-
-Deployment Prep: Create a Dockerfile for the Go backend and ensure the SvelteKit frontend can be built for static deployment.
+**Database Resilience (30 minutes)**:
+- Neon connection pool optimization
+- Database health checks and retry logic
+- Graceful error handling with user-friendly messages
+- Connection timeout and circuit breaker patterns
