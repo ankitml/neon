@@ -1,3 +1,8 @@
 .env
 .venv
 __pycache__
+
+# Go development files
+backend/golang/tmp/
+backend/golang/server.log
+backend/golang/build-errors.log

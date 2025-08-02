@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -18,10 +19,10 @@ type Quote struct {
 	ID                int      `json:"id"`
 	Quote             string   `json:"quote"`
 	Author            string   `json:"author"`
-	Category          string   `json:"category"`
+	Category          *string  `json:"category,omitempty"`
 	Tags              []string `json:"tags"`
 	Relevance         float64  `json:"relevance"`
-	HighlightedQuote  string   `json:"highlighted_quote,omitempty"`
+	HighlightedQuote  *string  `json:"highlighted_quote,omitempty"`
 }
 
 type SearchResponse struct {
@@ -93,17 +94,25 @@ func (h *Handlers) BuildResponse(rows pgx.Rows, query string) (SearchResponse, e
 	
 	for rows.Next() {
 		var q Quote
-		err := rows.Scan(&q.ID, &q.Quote, &q.Author, &q.Category, &q.Tags, &q.Relevance, &q.HighlightedQuote)
+		var tagsArray []string
+		
+		err := rows.Scan(&q.ID, &q.Quote, &q.Author, &q.Category, &tagsArray, &q.Relevance, &q.HighlightedQuote)
 		if err != nil {
+			// Log the specific error for debugging
+			log.Printf("Scan error: %v", err)
 			return SearchResponse{}, err
 		}
+		
+		q.Tags = tagsArray
 		quotes = append(quotes, q)
 	}
 
 	if err := rows.Err(); err != nil {
+		log.Printf("Rows error: %v", err)
 		return SearchResponse{}, err
 	}
 
+	log.Printf("Successfully parsed %d quotes", len(quotes))
 	return SearchResponse{
 		Results: quotes,
 		Count:   len(quotes),

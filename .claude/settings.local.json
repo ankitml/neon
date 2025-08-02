@@ -22,7 +22,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(source .env)",
-      "WebFetch(domain:docs.paradedb.com)"
+      "WebFetch(domain:docs.paradedb.com)",
+      "Bash(go mod init:*)",
+      "Bash(go get:*)",
+      "Bash(ln:*)",
+      "Bash(cp:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl:*)",
+      "Bash(go install:*)"
     ],
     "deny": []
   }
