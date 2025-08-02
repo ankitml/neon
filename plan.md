@@ -103,8 +103,43 @@ Phase 5: Kubernetes Deployment (2-3 hours)
 - Log monitoring and troubleshooting
 - Basic smoke testing of search functionality
 
+## Build vs Deploy Strategy:
+**Separate build-time from runtime for optimal Docker images:**
+- **Local Build Process**: `make build-frontend build-backend build-docker`
+- **Runtime Container**: Only pre-built static files + Go binary (no build tools)
+- **Benefits**: Faster builds, smaller images, CI/CD friendly
+
 ## Container Registry Recommendation:
 **GitHub Container Registry (ghcr.io)** - Free 500MB private storage, integrates with your existing GitHub repo
+
+## Load Balancing Options:
+
+### Option A: Civo LoadBalancer (Current Default)
+```yaml
+type: LoadBalancer  # Cloud provider managed
+```
+**Pros**: ✅ Fully managed, ✅ Simple setup, ✅ Production ready
+**Cons**: ❌ $10-20/month per service
+**Access**: Direct public IP
+
+### Option B: NodePort (Free Alternative)
+```yaml
+type: NodePort
+nodePort: 30080  # Port 30000-32767 range
+```
+**Pros**: ✅ Free, ✅ No extra components, ✅ Simple
+**Cons**: ❌ Non-standard ports, ❌ Must manage node IPs
+**Access**: `http://NODE_IP:30080`
+
+### Option C: Ingress Controller (Production Best Practice)
+```yaml
+type: ClusterIP + Ingress
+# nginx-ingress, traefik, or kong
+```
+**Pros**: ✅ One LoadBalancer for all apps, ✅ SSL termination, ✅ Advanced routing
+**Cons**: ❌ More complexity, ❌ Requires setup
+**Cost**: $10-20/month total (shared across all applications)
+**Access**: Standard HTTP/HTTPS with custom domains
 
 ---
 
