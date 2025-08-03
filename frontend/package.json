@@ -29,6 +29,7 @@
 	"dependencies": {
 		"@skeletonlabs/skeleton": "^3.1.7",
 		"@skeletonlabs/tw-plugin": "^0.4.1",
+		"@sveltejs/adapter-static": "^3.0.8",
 		"@tailwindcss/postcss": "^4.1.11"
 	}
 }

@@ -36,12 +36,13 @@ func main() {
 	}
 
 	// Create handlers
-	handlers := &Handlers{db: pool}
+	handlers := NewHandlers(pool)
 
 	// Setup routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handlers.HealthHandler)
 	mux.HandleFunc("/api/search", handlers.SearchHandler)
+	mux.HandleFunc("/api/browse", handlers.BrowseHandler)
 
 	// Setup CORS
 	c := cors.New(cors.Options{

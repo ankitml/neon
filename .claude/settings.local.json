@@ -30,7 +30,18 @@
       "Bash(git push:*)",
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
-      "Bash(go install:*)"
+      "Bash(go install:*)",
+      "Bash(npm create:*)",
+      "Bash(npx sv create:*)",
+      "Bash(npx create-svelte:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(git reset:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo push:*)"
     ],
     "deny": []
   }
