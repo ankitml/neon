@@ -1,265 +1,166 @@
-# Browse API with Facets and Pagination
+# Search and Facets Implementation
 
 ## Overview
-Design and implement a browse API that allows users to explore quotes with filtering, faceting, and pagination capabilities. The facets system should be generic and reusable for both browse and search functionality.
+Implementation of combined search and filtering functionality using ParadeDB BM25 search with hybrid filtering approach. The browse API with facets has been completed. This document focuses on adding filtering support to the search API.
 
-## Database Schema Analysis
-From the `quotes` table, we have these facetable fields:
-- `author` (VARCHAR(255)) - Individual quote authors
-- `category` (VARCHAR(100)) - Quote categories (arts, books, death, education, etc.)
-- `tags` (TEXT[]) - Array of tags per quote (Life, Good, humor, Love, etc.)
+## Database Schema and BM25 Index
+ParadeDB version: **0.15.26**
+BM25 Index: `quotes_search_idx` with fields:
+- `id` (I64) - Primary key, fast field
+- `quote` (Str) - Full-text searchable content  
+- `author` (Str) - Author names, searchable
+- `category` (Str) - Quote categories, filterable
+- `tags` (Str) - Tags array, searchable
+- `ctid` (U64) - Row identifier, fast field
+
+Non-indexed fields (require WHERE clauses):
 - `popularity` (DECIMAL) - Numerical score for ranking
 - `created_at` (TIMESTAMP) - Date-based filtering
 
-## API Design
+## Search + Filters Implementation Status
 
-### Endpoint: `/api/browse`
+### ✅ Completed: Browse API with Facets
+- Full browse functionality with faceting
+- Category, tag, popularity, and date filtering
+- Pagination and sorting
+- Frontend integration with refinements UI
 
-**Query Parameters:**
-- `page` (int, default: 1) - Page number for pagination
-- `limit` (int, default: 20, max: 100) - Items per page
-- `sort` (string, default: "popularity") - Sort field: "popularity", "created_at", "random"
-- `order` (string, default: "desc") - Sort order: "asc", "desc"
+### 🎯 Current Goal: Hybrid Search + Filters
 
-**Filter Parameters:**
-- `categories[]` (string array) - Filter by categories
-- `tags[]` (string array) - Filter by tags (AND logic - quote must have ALL specified tags)
-- `popularity_min` (float) - Minimum popularity score
-- `popularity_max` (float) - Maximum popularity score
-- `date_from` (ISO date) - Created after date
-- `date_to` (ISO date) - Created before date
+## Supported Filter Types with ParadeDB BM25
 
-**Facet Parameters:**
-- `facets` (boolean, default: true) - Include facet counts in response
-- `facet_limit` (int, default: 10) - Max items per facet
+### ✅ **Boolean Query Method** (for BM25-indexed fields):
 
-### Response Format
+**Category Filtering:**
+```sql
+paradedb.boolean(
+  must => ARRAY[
+    paradedb.match('quote', 'search_term'),
+    paradedb.term('category', 'exact_category_value')
+  ]
+)
+```
 
-```json
-{
-  "quotes": [
-    {
-      "id": 1,
-      "quote": "Life is what happens...",
-      "author": "John Lennon",
-      "category": "life", 
-      "tags": ["Life", "inspirational"],
-      "popularity": 0.85,
-      "created_at": "2024-01-15T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total_pages": 250,
-    "total_count": 5000,
-    "has_next": true,
-    "has_prev": false
-  },
-  "facets": {
-    "categories": [
-      {"value": "life", "count": 1200},
-      {"value": "love", "count": 890}
-    ],
-    "tags": [
-      {"value": "Life", "count": 380},
-      {"value": "inspirational", "count": 192}
-    ],
-    "popularity_range": {
-      "min": 0.01,
-      "max": 0.99
-    }
-  },
-  "active_filters": {
-    "categories": ["life"],
-    "tags": ["inspirational"]
-  }
-}
+**Author Search (fuzzy matching):**
+```sql
+paradedb.boolean(
+  must => ARRAY[
+    paradedb.match('quote', 'search_term'),
+    paradedb.match('author', 'author_name_part')
+  ]
+)
+```
+
+**Tag Filtering (text search within tags):**
+```sql
+paradedb.boolean(
+  must => ARRAY[
+    paradedb.match('quote', 'search_term'),
+    paradedb.match('tags', 'tag_value')
+  ]
+)
+```
+
+### ✅ **WHERE Clause Method** (for non-indexed fields):
+
+**Popularity Range:**
+```sql
+WHERE quotes @@@ paradedb.with_index('quotes_search_idx', paradedb.match('quote', 'term'))
+  AND popularity BETWEEN 0.01 AND 0.15
+```
+
+**Date Range:**
+```sql
+WHERE quotes @@@ paradedb.with_index('quotes_search_idx', paradedb.match('quote', 'term'))
+  AND created_at >= '2020-01-01'
+  AND created_at <= '2024-12-31'
+```
+
+**Exact Tag Matching (array membership):**
+```sql
+WHERE quotes @@@ paradedb.with_index('quotes_search_idx', paradedb.match('quote', 'term'))
+  AND 'Love' = ANY(tags)
+```
+
+**Multiple Tag AND Logic:**
+```sql
+WHERE quotes @@@ paradedb.with_index('quotes_search_idx', paradedb.match('quote', 'term'))
+  AND tags @> ARRAY['tag1', 'tag2']
 ```
 
 ## Implementation Plan
 
-### Phase 1: Core Browse API
-1. **Create Browse Handler** (`handlers.go`)
-   - New `BrowseQuotesHandler` function
-   - Parse query parameters with validation
-   - Build dynamic SQL with WHERE clauses
-   - Implement pagination logic
+### Phase 1: Hybrid Search Handler ✅ Ready to Implement
+1. **Extend Search Handler** (`handlers.go`)
+   - Add filter parameter parsing (reuse from browse API)
+   - Implement hybrid query building:
+     - Boolean query for BM25-indexed fields
+     - WHERE clauses for non-indexed fields
+   - Maintain search relevance scoring
 
-2. **Add Route** (`main.go`)
-   - Register `/api/browse` endpoint
-   - Add CORS headers
-
-3. **Database Queries**
-   - Main quotes query with filters and pagination
-   - Count query for total results
-   - Facet aggregation queries
-
-### Phase 2: Generic Faceting System
-1. **Facet Types**
-   - `TermFacet`: For categorical fields (category)
-   - `ArrayFacet`: For array fields (tags) 
-   - `RangeFacet`: For numerical fields (popularity)
-   - `DateRangeFacet`: For timestamp fields (future use)
-
-2. **Facet Interface**
+2. **Query Builder Strategy**
    ```go
-   type Facet interface {
-       GetName() string
-       BuildQuery(filters map[string]interface{}) string
-       ParseResults(rows *sql.Rows) ([]FacetItem, error)
-   }
-   
-   type FacetItem struct {
-       Value string `json:"value"`
-       Count int    `json:"count"`
+   // Pseudo-code approach
+   func buildSearchWithFilters(searchTerm string, filters BrowseParams) string {
+     // Build boolean query parts for BM25 fields
+     booleanMust := []string{
+       paradedb.match('quote', searchTerm)
+     }
+     
+     if len(filters.Categories) > 0 {
+       for _, cat := range filters.Categories {
+         booleanMust = append(booleanMust, paradedb.term('category', cat))
+       }
+     }
+     
+     // Build WHERE clause parts for non-BM25 fields  
+     var whereClauses []string
+     if filters.PopularityMin != nil {
+       whereClauses = append(whereClauses, "popularity >= $X")
+     }
+     
+     // Combine: BM25 query + WHERE filters
+     sql := fmt.Sprintf(`
+       SELECT id, quote, author, category, tags, popularity, created_at, 
+              paradedb.score(id) as bm25_score
+       FROM quotes 
+       WHERE quotes @@@ paradedb.with_index('quotes_search_idx', 
+         paradedb.boolean(must => ARRAY[%s])
+       ) %s
+       ORDER BY paradedb.score(id) DESC
+       LIMIT $Y OFFSET $Z
+     `, strings.Join(booleanMust, ","), strings.Join(whereClauses, " AND "))
    }
    ```
 
-3. **Facet Manager**
-   - Registry of available facets
-   - Execute facet queries in parallel
-   - Combine results
+### Phase 2: Frontend Integration
+1. **Update Search Component**
+   - Add same filter UI used in browse mode
+   - Show "Search + Filters" indicator when both active
+   - Maintain search relevance scores in results
 
-### Phase 3: Search Integration
-1. **Extend Search API**
-   - Add same filter parameters to `/api/search`
-   - Include facets in search responses
-   - Maintain search relevance + filtering
+2. **Unified API Response**
+   - Include facets in search responses (based on current filters)
+   - Show active filters with remove buttons
+   - Display search relevance scores alongside filtered results
 
-2. **Unified Filter System**
-   - Shared filter parsing logic
-   - Common SQL builder functions
-   - Consistent response format
+## Filter Support Matrix
 
-### Phase 4: Performance Optimization
-1. **Database Indexes**
-   - Composite indexes for common filter combinations
-   - Array indexes for tags (GIN index)
-   - Consider materialized views for heavy facet queries
-
-2. **Caching Strategy**
-   - Redis cache for facet counts
-   - Cache invalidation on data updates
-   - Response compression
-
-## Decisions Made
-
-1. **Tag Filtering Logic**: ✅ AND logic (quote must have ALL specified tags)
-2. **Author Faceting**: ✅ Skip for now (will implement search-as-you-type later)
-3. **Default Sorting**: ✅ `popularity DESC` as default, but sorting parameter required
-4. **Performance Priority**: ✅ Accuracy over speed (real-time facet counts)
-5. **UI Integration**: ✅ Same UI with layered functionality (details below)
-
-## UI Integration Plan
-
-### Layout Structure
-```
-┌─────────────────────────────────────┐
-│         Search Box                  │ ← Search API
-├─────────────────────────────────────┤
-│    Filter Row (Categories, Tags,    │ ← Browse API
-│    Sort, Date Range)                │
-├─────────────────────────────────────┤
-│                                     │
-│         Quotes List                 │ ← Results from active API
-│         (Paginated)                 │
-│                                     │
-└─────────────────────────────────────┘
-```
-
-### API Usage Logic
-- **Search Mode**: When user types in search box → Use `/api/search`
-- **Browse Mode**: When user uses filters/sorting only → Use `/api/browse` 
-- **Future**: Combine search + filters → Enhanced `/api/search` with filter support
-
-### Frontend State Management
-```javascript
-const state = {
-  mode: 'browse', // 'browse' | 'search'
-  searchQuery: '',
-  filters: {
-    categories: [],
-    tags: [],
-    sort: 'popularity',
-    order: 'desc',
-    popularity_min: null,
-    popularity_max: null
-  },
-  results: [],
-  facets: {},
-  pagination: {}
-}
-```
-
-### Component Updates Required
-
-1. **SearchBox Component**
-   - Add `onInput` handler to switch to search mode
-   - Clear filters when switching to search mode (optional)
-   - Debounce search queries (300ms)
-
-2. **New FilterRow Component**
-   - Category multi-select dropdown (from facets)
-   - Tag multi-select with popular tags (from facets, AND logic)
-   - Sort dropdown (popularity, created_at, random)
-   - Sort order toggle (asc/desc) 
-   - Clear all filters button
-
-3. **Updated QuotesList Component**
-   - Handle both search and browse results
-   - Show active filters as removable chips
-   - Loading states for both APIs
-   - Pagination controls
-
-4. **New Facets Component**
-   - Display facet counts next to filter options
-   - Update when filters change
-   - Show "applied" state for active filters
-
-### API Switching Logic
-```javascript
-const fetchQuotes = async () => {
-  const isSearchMode = searchQuery.trim().length > 0;
-  
-  if (isSearchMode) {
-    // Use search API
-    const params = new URLSearchParams({
-      q: searchQuery,
-      page: pagination.page,
-      limit: pagination.limit
-    });
-    const response = await fetch(`/api/search?${params}`);
-  } else {
-    // Use browse API with filters
-    const params = new URLSearchParams({
-      page: pagination.page,
-      limit: pagination.limit,
-      sort: filters.sort,
-      order: filters.order,
-      facets: true
-    });
-    
-    // Add array filters
-    filters.categories.forEach(cat => params.append('categories[]', cat));
-    filters.tags.forEach(tag => params.append('tags[]', tag));
-    
-    const response = await fetch(`/api/browse?${params}`);
-  }
-};
-```
-
-### Phase Integration with Existing Work
-- **Phase 1**: Implement browse API backend (reuse existing Go structure)
-- **Phase 2**: Update frontend components (modify existing SvelteKit app) 
-- **Phase 3**: Add faceting system to search API
-- **Phase 4**: Performance optimization
+| Filter Type | Browse API | Search API (Planned) | Method |
+|-------------|------------|---------------------|---------|
+| Categories | ✅ | ✅ | Boolean query |
+| Tags (exact) | ✅ | ✅ | WHERE clause |
+| Tags (fuzzy) | ❌ | ✅ | Boolean query |
+| Author search | ❌ | ✅ | Boolean query |
+| Popularity range | ✅ | ✅ | WHERE clause |
+| Date range | ✅ | ✅ | WHERE clause |
+| Sorting | ✅ | ⚠️ | Score-based only |
 
 ## Technical Notes
 
-- Use pgx driver for efficient bulk operations
-- Implement query builder pattern for dynamic WHERE clauses
-- Consider using PostgreSQL's array operators for tag filtering
-- Use LIMIT/OFFSET for pagination (may switch to cursor-based for very large datasets)
-- Add request timeout handling (10s max)
-- Include query performance metrics in response headers
+- **Hybrid Approach**: Combine ParadeDB boolean queries with PostgreSQL WHERE clauses
+- **Performance**: BM25 filters integrate with search scoring; WHERE filters applied post-search
+- **Scoring**: Maintain search relevance while filtering
+- **Facets**: Generate facets based on search results + current filters  
+- **Compatibility**: All existing browse functionality remains unchanged
+

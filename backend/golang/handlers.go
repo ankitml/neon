@@ -44,31 +44,56 @@ func (h *Handlers) HealthHandler(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	// Get search query from URL parameter
+	// Get search query from URL parameter (can be empty for browse mode)
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	
+	// Parse all browse parameters (including filters)
+	params, err := h.parseBrowseParams(r)
+	if err != nil {
+		log.Printf("Invalid search parameters: %v", err)
+		http.Error(w, `{"error": "Invalid parameters"}`, http.StatusBadRequest)
+		return
+	}
+
 	if query == "" {
-		http.Error(w, `{"error": "q parameter is required"}`, http.StatusBadRequest)
-		return
-	}
+		// Browse mode: no search query, use browse logic
+		rows, err := h.browseQueries.BuildStatement(params)
+		if err != nil {
+			log.Printf("Browse query failed: %v", err)
+			http.Error(w, `{"error": "Database query failed"}`, http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
 
-	// Execute database query
-	rows, err := h.searchQueries.BuildStatement(query)
-	if err != nil {
-		log.Printf("Search query failed: %v", err)
-		http.Error(w, `{"error": "Database query failed"}`, http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
+		// Build and send browse response
+		response, err := h.browseQueries.BuildResponse(rows, params)
+		if err != nil {
+			log.Printf("Browse response failed: %v", err)
+			http.Error(w, `{"error": "Failed to parse results"}`, http.StatusInternalServerError)
+			return
+		}
 
-	// Build and send response
-	response, err := h.searchQueries.BuildResponse(rows, query)
-	if err != nil {
-		log.Printf("Search response failed: %v", err)
-		http.Error(w, `{"error": "Failed to parse results"}`, http.StatusInternalServerError)
-		return
-	}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		// Search mode: use search with filters
+		rows, err := h.searchQueries.BuildStatementWithFilters(query, params)
+		if err != nil {
+			log.Printf("Search with filters query failed: %v", err)
+			http.Error(w, `{"error": "Database query failed"}`, http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
 
-	json.NewEncoder(w).Encode(response)
+		// Build and send search response with filters
+		response, err := h.searchQueries.BuildResponseWithFilters(rows, query, params)
+		if err != nil {
+			log.Printf("Search with filters response failed: %v", err)
+			http.Error(w, `{"error": "Failed to parse results"}`, http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(response)
+	}
 }
 
 func (h *Handlers) BrowseHandler(w http.ResponseWriter, r *http.Request) {

@@ -23,38 +23,11 @@
 	let pagination = {};
 	let mounted = false;
 
-	async function handleSearch() {
-		if (!searchQuery.trim()) {
-			mode = 'browse';
-			return await loadQuotes();
-		}
-		
-		mode = 'search';
-		isLoading = true;
-		error = '';
-		
-		try {
-			const response = await fetch(`http://localhost:8080/api/search?q=${encodeURIComponent(searchQuery)}`);
-			
-			if (!response.ok) {
-				throw new Error('Search failed');
-			}
-			
-			const data = await response.json();
-			results = data.results || [];
-			pagination = { total_count: data.count || 0 };
-		} catch (err) {
-			error = err.message || 'An error occurred';
-			results = [];
-		} finally {
-			isLoading = false;
-		}
-	}
-
 	async function loadQuotes() {
 		if (!mounted) return;
 		
-		mode = 'browse';
+		// Determine mode based on search query
+		mode = searchQuery.trim() ? 'search' : 'browse';
 		isLoading = true;
 		error = '';
 		
@@ -67,26 +40,38 @@
 				facets: 'true'
 			});
 			
+			// Add search query if present
+			if (searchQuery.trim()) {
+				params.set('q', searchQuery.trim());
+			}
+			
 			// Add array filters
 			selectedCategories.forEach(cat => params.append('categories[]', cat));
 			selectedTags.forEach(tag => params.append('tags[]', tag));
 			
-			const response = await fetch(`http://localhost:8080/api/browse?${params}`);
+			// Use unified search API for both search and browse
+			const response = await fetch(`http://localhost:8080/api/search?${params}`);
 			
 			if (!response.ok) {
-				throw new Error('Browse failed');
+				throw new Error('Request failed');
 			}
 			
 			const data = await response.json();
-			results = data.quotes || [];
+			results = data.quotes || data.results || [];
 			facets = data.facets || {};
-			pagination = data.pagination || {};
+			pagination = data.pagination || { total_count: data.count || 0 };
 		} catch (err) {
 			error = err.message || 'An error occurred';
 			results = [];
 		} finally {
 			isLoading = false;
 		}
+	}
+
+	// Simplified search handler - just calls loadQuotes
+	async function handleSearch() {
+		page = 1; // Reset to first page when searching
+		return await loadQuotes();
 	}
 
 	function copyToClipboard(text) {
@@ -130,11 +115,7 @@
 
 	function changePage(newPage) {
 		page = newPage;
-		if (mode === 'search') {
-			handleSearch();
-		} else {
-			loadQuotes();
-		}
+		loadQuotes();
 	}
 
 	// Load initial quotes on page load
