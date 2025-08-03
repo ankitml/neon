@@ -1,0 +1,31 @@
+# Source code (we only need built artifacts)
+frontend/src/
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/.vite/
+backend/golang/*.go
+backend/golang/go.mod
+backend/golang/go.sum
+
+# Development files
+.git/
+.gitignore
+*.md
+.env*
+.claude/
+
+# Build tools
+*/Makefile
+air.toml
+*.log
+
+# Data ingestion (not needed for deployment)
+data-ingestion/
+
+# Keep only what we need:
+# frontend/build/
+# backend/golang/quotes-api
+# nginx.conf
+# supervisord.conf
+# start.sh
+# Dockerfile

@@ -1,13 +1,21 @@
-.PHONY: help run dev test clean deps
+.PHONY: help build run dev test clean deps
+
+BINARY_NAME=quotes-api
 
 # Default target
 help:
 	@echo "Available commands:"
+	@echo "  build  - Build Go binary for production"
 	@echo "  run    - Start the Go server"
 	@echo "  dev    - Start the Go server with live reload (recommended)"
 	@echo "  test   - Run integration tests (server must be running)"
 	@echo "  deps   - Install/update Go dependencies"
-	@echo "  clean  - Clean Go module cache"
+	@echo "  clean  - Clean Go module cache and binary"
+
+# Build production binary
+build:
+	CGO_ENABLED=0 GOOS=linux go build -o $(BINARY_NAME) .
+	@echo "✅ Backend built to: ./$(BINARY_NAME)"
 
 # Load environment and run server
 run:
@@ -33,7 +41,8 @@ deps:
 	go mod tidy
 	go mod download
 
-# Clean module cache
+# Clean module cache and binary
 clean:
 	go clean -modcache
 	go mod tidy
+	rm -f $(BINARY_NAME)
