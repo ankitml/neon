@@ -1,0 +1,218 @@
+
+> my-v0-project@0.1.0 dev /Users/ankit/Documents/neon/quotes-app
+> next dev
+
+   ▲ Next.js 15.2.4
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.50.21:3000
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 1558ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1928ms (880 modules)
+ GET / 200 in 2121ms
+ ✓ Compiled /_not-found in 236ms (866 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 297ms
+ GET / 200 in 10ms
+ GET / 200 in 62ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 13ms
+ ⨯ ./app/quotes/page.tsx
+Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:8:1]
+ [2m 5[0m | import { Button } from "@/components/ui/button";
+ [2m 6[0m | import { Card, CardContent } from "@/components/ui/card";
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+    : [35;1m^^^^^^^^^^^^^[0m
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    `----
+  [31mx[0m You're importing a component that needs `useState`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m         ^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m                   ^^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+
+Import trace for requested module:
+./app/quotes/page.tsx
+ ⨯ ./app/quotes/page.tsx
+Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:8:1]
+ [2m 5[0m | import { Button } from "@/components/ui/button";
+ [2m 6[0m | import { Card, CardContent } from "@/components/ui/card";
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+    : [35;1m^^^^^^^^^^^^^[0m
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    `----
+  [31mx[0m You're importing a component that needs `useState`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m         ^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m                   ^^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+
+Import trace for requested module:
+./app/quotes/page.tsx
+ ○ Compiling /_not-found ...
+ ⨯ ./app/quotes/page.tsx
+Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:8:1]
+ [2m 5[0m | import { Button } from "@/components/ui/button";
+ [2m 6[0m | import { Card, CardContent } from "@/components/ui/card";
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+    : [35;1m^^^^^^^^^^^^^[0m
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    `----
+  [31mx[0m You're importing a component that needs `useState`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m         ^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m                   ^^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+
+Import trace for requested module:
+./app/quotes/page.tsx
+ ⨯ ./app/quotes/page.tsx
+Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:8:1]
+ [2m 5[0m | import { Button } from "@/components/ui/button";
+ [2m 6[0m | import { Card, CardContent } from "@/components/ui/card";
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+    : [35;1m^^^^^^^^^^^^^[0m
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    `----
+  [31mx[0m You're importing a component that needs `useState`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m         ^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m 
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/ankit/Documents/neon/quotes-app/app/quotes/page.tsx[0m:10:1]
+ [2m 7[0m | 
+ [2m 8[0m | "use client";
+ [2m 9[0m | 
+ [2m10[0m | import { useState, useEffect } from "react";
+    : [35;1m                   ^^^^^^^^^[0m
+ [2m11[0m | 
+ [2m12[0m | export default function QuotesPage() {
+ [2m13[0m |   const [searchQuery, setSearchQuery] = useState("");
+    `----
+
+Import trace for requested module:
+./app/quotes/page.tsx
+ GET /_next/static/webpack/853be6c69dfb5492.webpack.hot-update.json 500 in 1916ms
+ GET /quotes 500 in 2261ms
+ GET / 500 in 263ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /.well-known/appspecific/com.chrome.devtools.json 500 in 6ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/ankit/Documents/neon/quotes-app/.next/cache/webpack/client-development-fallback/0.pack.gz_' -> '/Users/ankit/Documents/neon/quotes-app/.next/cache/webpack/client-development-fallback/0.pack.gz'
+ ✓ Compiled /_not-found in 281ms (1195 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /_next/static/webpack/e9d5b08f0744e585.webpack.hot-update.json 404 in 357ms
+ ✓ Compiled /quotes in 359ms (1196 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /quotes 200 in 421ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 15ms
+ ✓ Compiled in 442ms (1204 modules)
+ GET /quotes 200 in 35ms
+ GET / 200 in 59ms
+ ✓ Compiled /_not-found in 218ms (1194 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 272ms
