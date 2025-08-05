@@ -2,6 +2,6 @@
 	import '../app.postcss';
 </script>
 
-<div class="h-full overflow-hidden">
+<div class="min-h-screen">
 	<slot />
 </div>
